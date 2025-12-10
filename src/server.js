@@ -43,7 +43,7 @@ app.get('/produtos', async (req, res) => {
 app.get('/produto/:id', async (req, res) => {
     try {
         const { id } = req.params; //igual a const id = req.param.id
-        
+
         const produto = await Produto.findByPk(id);
 
         /* 
@@ -136,13 +136,16 @@ app.put('/produto/:id', async (req, res) => {
         const { id } = req.params;
         const payload = req.body;
 
+        // procura por id o produto a ser atualizado
         const produto = await Produto.findByPk(id);
 
+        // Se o produto não existe, retorna o 404, e retorna produto não encontrado
         if (!produto) {
             console.log(`❌ Não existe produto com ID ${id}`);
             return res.status(404).json({ erro: "Produto não encontrado" });
         }
 
+        //await Produto.update(payload, { where: { id } });
         await produto.update(payload);
 
         console.log(`✏️ Produto ID ${id} atualizado!`);
