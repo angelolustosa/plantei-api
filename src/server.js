@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 
 // IMPORTAR MODELS AQUI
 import './models/Produto.js';
@@ -9,6 +10,32 @@ const HOST = '127.0.0.1'
 const PORT = '5000'
 
 const app = express();
+
+// Configuração do CORS
+//app.use(cors()); // 👈 libera tudo
+
+
+const allowedOrigins = [
+  'http://localhost:5173',   // Vite padrão
+  'http://127.0.0.1:5173',
+  'http://localhost:3000',   // se usar outro front CRA
+];
+
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // permite chamadas sem origin (Postman, curl)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('Not allowed by CORS'));
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
 app.use(express.json());
 
