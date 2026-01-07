@@ -47,6 +47,10 @@ export const Produto = sequelize.define('produto', {
                 msg: "URl da imagem inválida"
             }
         }
-    }
+    },
+    categoria_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
 
 })
