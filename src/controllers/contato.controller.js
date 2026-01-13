@@ -1,128 +1,112 @@
-import { Contato } from "../models/Contato.js";
-import { log } from "../utils/logger.js";
+import contatoService from '../services/contato.service.js';
+import { log } from '../utils/logger.js';
 
 export default {
-  async listar(req, res) {
+  async listar(req, res, next) {
     try {
-      const contatos = await Contato.findAll();
-
-      log.info("Listando contatos...");
+      log.info('[Contato] Listando contatos');
+      const contatos = await contatoService.listar();
 
       return res.status(200).json({
-        mensagem: "Contatos retornados com sucesso!",
+        mensagem: 'Contatos retornados com sucesso!',
         size: contatos.length,
         data: contatos,
       });
     } catch (err) {
       log.error(err);
-      return res.status(500).json({ erro: "Erro ao buscar contatos" });
+      next(err);
     }
   },
 
-  async buscarPorId(req, res) {
+  async buscarPorId(req, res, next) {
     try {
       const { id } = req.params;
 
-      const contato = await Contato.findByPk(id);
+      const contato = await contatoService.buscarPorId(id);
 
       if (!contato) {
-        return res.status(404).json({ erro: "Contato não encontrado" });
+        return res.status(404).json({ erro: 'Contato não encontrado' });
       }
 
       return res.json(contato);
     } catch (err) {
       log.error(err);
-      return res.status(500).json({ erro: "Erro no servidor" });
+      next(err);
     }
   },
 
-  async criar(req, res) {
+  async criar(req, res, next) {
     try {
-      const payload = req.body;
+      const novo = await contatoService.criar(req.body);
 
-      const novo = await Contato.create(payload);
-
-      log.success(`Contato criado: ${novo.nome}`);
+      log.success(`[Contato] Criado: ${novo.nome}`);
 
       return res.status(201).json({
-        mensagem: "Contato criado com sucesso!",
+        mensagem: 'Contato criado com sucesso!',
         data: novo,
       });
     } catch (err) {
       log.error(err);
-
-      if (err.name === "SequelizeValidationError") {
-        return res.status(400).json({
-          erro: err.errors.map((e) => e.message),
-        });
-      }
-
-      return res.status(500).json({ erro: "Erro ao criar contato" });
+      next(err);
     }
   },
 
-  async atualizar(req, res) {
+  async atualizar(req, res, next) {
     try {
       const { id } = req.params;
-      const payload = req.body;
 
-      const contato = await Contato.findByPk(id);
+      const contato = await contatoService.atualizar(id, req.body);
 
       if (!contato) {
-        return res.status(404).json({ erro: "Contato não encontrado" });
+        return res.status(404).json({ erro: 'Contato não encontrado' });
       }
 
-      await contato.update(payload);
-
       return res.json({
-        mensagem: "Contato atualizado com sucesso!",
+        mensagem: 'Contato atualizado com sucesso!',
         data: contato,
       });
     } catch (err) {
       log.error(err);
-      return res.status(500).json({ erro: "Erro ao atualizar contato" });
+      next(err);
     }
   },
 
-  async patch(req, res) {
+  async patch(req, res, next) {
     try {
       const { id } = req.params;
-      const payload = req.body;
 
-      const contato = await Contato.findByPk(id);
+      const contato = await contatoService.atualizar(id, req.body);
 
       if (!contato) {
-        return res.status(404).json({ erro: "Contato não encontrado" });
+        return res.status(404).json({ erro: 'Contato não encontrado' });
       }
 
-      await contato.update(payload);
-
       return res.json({
-        mensagem: "Contato atualizado parcialmente!",
+        mensagem: 'Contato atualizado parcialmente!',
         data: contato,
       });
     } catch (err) {
       log.error(err);
-      return res.status(500).json({ erro: "Erro ao atualizar parcialmente" });
+      next(err);
     }
   },
 
-  async remover(req, res) {
+  async remover(req, res, next) {
     try {
       const { id } = req.params;
 
-      const contato = await Contato.findByPk(id);
+      const removido = await contatoService.remover(id);
 
-      if (!contato) {
-        return res.status(404).json({ erro: "Contato não encontrado" });
+      if (!removido) {
+        return res.status(404).json({ erro: 'Contato não encontrado' });
       }
 
-      await contato.destroy();
-
-      return res.json({ mensagem: "Contato removido com sucesso!" });
+      return res.json({
+        mensagem: 'Contato removido com sucesso!',
+      });
     } catch (err) {
       log.error(err);
-      return res.status(500).json({ erro: "Erro ao remover contato" });
+      next(err);
     }
   },
 };
