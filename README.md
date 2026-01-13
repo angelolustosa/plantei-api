@@ -80,7 +80,7 @@ Recomenda-se usar o PostgreSQL do próprio Render ou um serviço externo como:
 ### 4. Acesso à Documentação
 
 Após o deploy, a documentação estará disponível em:
-`https://seu-app.onrender.com/api-docs`
+**https://plantei-api.onrender.com/api-docs**
 
 ## Documentação da API
 

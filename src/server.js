@@ -16,7 +16,7 @@ const isProduction = process.env.NODE_ENV === 'production';
     app.listen(PORT, () => {
       if (isProduction) {
         console.log(`🚀 Servidor rodando na porta ${PORT}`);
-        console.log(`📄 Documentação: ${process.env.RENDER_EXTERNAL_URL}/api-docs`);
+        console.log(`📄 Documentação: https://plantei-api.onrender.com/api-docs`);
       } else {
         console.log(`🚀 Servidor rodando em http://${HOST}:${PORT}`);
         console.log(`📄 Documentação: http://${HOST}:${PORT}/api-docs`);

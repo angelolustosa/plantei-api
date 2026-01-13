@@ -2,7 +2,7 @@ import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
-const baseUrl = process.env.RENDER_EXTERNAL_URL || 'http://localhost:3000';
+const baseUrl = isDevelopment ? 'http://localhost:3000' : 'https://plantei-api.onrender.com';
 
 const options = {
   definition: {
