@@ -1,14 +1,18 @@
 {
   "name": "plantei-api",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "API para gerenciamento de produtos e contatos do sistema Plantei",
+  "main": "src/server.js",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
-    "start": "nodemon ./src/server.js",
+    "start": "node ./src/server.js",
+    "dev": "nodemon ./src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": ["api", "nodejs", "express", "sequelize", "postgresql"],
   "author": "",
   "license": "ISC",
   "devDependencies": {
@@ -20,6 +24,8 @@
     "express": "^5.1.0",
     "pg": "^8.16.3",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.37.7"
+    "sequelize": "^6.37.7",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   }
 }

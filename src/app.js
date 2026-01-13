@@ -2,11 +2,15 @@ import express from 'express';
 import cors from './config/cors.js';
 import routes from './routes/index.js';
 import errorMiddleware from './middlewares/error.middleware.js';
+import { swaggerUi, specs } from './config/swagger.js';
 
 const app = express();
 
 app.use(cors);
 app.use(express.json());
+
+// Swagger Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 app.use('/api', routes);
 
