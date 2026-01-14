@@ -6,6 +6,7 @@ import './models/Produto.js';
 import './models/Contato.js';
 import { sequelize } from './config/database.js';
 import { Produto } from './models/Produto.js';
+import { Contato } from './models/Contato.js';
 
 const HOST = '127.0.0.1'
 const PORT = '5000'
