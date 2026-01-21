@@ -8,6 +8,7 @@ const app = express();
 app.use(cors);
 app.use(express.json());
 
+// Rotas da API
 app.use('/api', routes);
 
 app.use(errorMiddleware);
