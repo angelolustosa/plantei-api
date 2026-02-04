@@ -26,6 +26,7 @@ export default {
           nome: usuario.nome,
           email: usuario.email,
         },
+        mensagem: 'Login realizado com sucesso',
       });
     } catch (err) {
       return res.status(401).json({ erro: err.message });
