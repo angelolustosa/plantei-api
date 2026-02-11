@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/database.js';
 
-export const Usuario = sequelize.define('Usuario', 
+export const Usuario = sequelize.define('Usuario',
     {
         id: {
             type: DataTypes.INTEGER,
@@ -34,7 +34,16 @@ export const Usuario = sequelize.define('Usuario',
                     msg: 'CPF deve conter 11 caracteres',
                 }
             }
-        }
+        },
+        // 🔐 chave estrangeira
+        id_perfil: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'perfis',
+                key: 'id',
+            },
+        },
     },
     {
         tableName: 'usuarios',
