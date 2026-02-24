@@ -40,7 +40,7 @@ export const Usuario = sequelize.define('Usuario',
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'perfis',
+                model: 'perfil',
                 key: 'id',
             },
         },
