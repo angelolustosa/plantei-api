@@ -25,7 +25,7 @@ export default {
       const produto = await produtoService.buscarPorId(id);
 
       if (!produto) {
-        return res.status(404).json({ erro: 'Produto não encontrado' });
+        return res.status(200).json({ erro: 'Produto não encontrado' });
       }
 
       return res.json(produto);

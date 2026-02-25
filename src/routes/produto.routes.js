@@ -11,7 +11,7 @@ router.use(authMiddleware);
 // 📖 listar produtos
 router.get(
   "/",
-  autorizarPermissao('produto_listar'),
+  autorizarPermissao('PRODUTO_LISTAR'),
   produtoController.listar
 );
 

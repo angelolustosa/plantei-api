@@ -25,6 +25,7 @@ export default {
           id: usuario.id,
           nome: usuario.nome,
           email: usuario.email,
+          perfil: usuario.perfil.nome,
         },
         mensagem: 'Login realizado com sucesso',
       });

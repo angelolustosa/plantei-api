@@ -2,9 +2,9 @@ import { Permissao } from '../models/index.js';
 
 export async function seedPermissoes() {
   const permissoes = [
-    { nome: 'Criar Produto', codigo: 'produto_criar' },
-    { nome: 'Listar Produto', codigo: 'produto_listar' },
-    { nome: 'Excluir Produto', codigo: 'produto_deletar' },
+    { nome: 'Criar Produto', codigo: 'PRODUTO_CRIAR' },
+    { nome: 'Listar Produto', codigo: 'PRODUTO_LISTAR' },
+    { nome: 'Excluir Produto', codigo: 'PRODUTO_DELETAR' },
   ];
 
   for (const permissao of permissoes) {

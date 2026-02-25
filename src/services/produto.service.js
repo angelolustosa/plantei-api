@@ -8,6 +8,10 @@ class ProdutoService {
   criar(payload) {
     return Produto.create(payload);
   }
+
+  buscarPorId(id) {
+    return Produto.findByPk(id);
+  }
 }
 
 export default new ProdutoService();

@@ -23,6 +23,6 @@ export const Perfil = sequelize.define(
   },
   {
     tableName: 'perfil',
-    timestamps: false,
+    timestamps: true,
   }
 );

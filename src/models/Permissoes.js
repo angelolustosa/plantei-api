@@ -21,6 +21,6 @@ export const Permissao = sequelize.define(
   },
   {
     tableName: 'permissoes',
-    timestamps: false,
+    timestamps: true,
   }
 );

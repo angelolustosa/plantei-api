@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 5000;
     await sequelize.authenticate();
     console.log('🎉 Banco conectado');
 
-    await sequelize.sync({ force: true }); //await sequelize.sync();
+    await sequelize.sync({ alter: true }); //await sequelize.sync();
     console.log('📦 Modelos sincronizados');
 
     app.listen(PORT, () =>
