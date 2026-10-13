@@ -7,13 +7,34 @@
   "scripts": {
     "start": "nodemon ./src/server.js",
     "seed": "node ./src/seeders/seed.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/seeders/**",
+      "!src/server.js"
+    ],
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ]
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^3.1.11"
+    "@jest/globals": "^30.5.2",
+    "jest": "^30.5.2",
+    "nodemon": "^3.1.11",
+    "supertest": "^7.3.1"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
