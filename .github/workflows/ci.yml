@@ -2,9 +2,9 @@ name: CI Plantei API - Quality & Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ gt_m2_d1 ]
   pull_request:
-    branches: [ main ]
+    branches: [ gt_m2_d1 ]
   workflow_dispatch:
 
 jobs:
