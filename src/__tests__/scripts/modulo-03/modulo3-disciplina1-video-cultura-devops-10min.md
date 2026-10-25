@@ -90,11 +90,13 @@ git commit -m "feat: adiciona rota de pedidos"
 
 ## 🔄 PARTE 3 — Fluxo de Colaboração e IA como Facilitadora (5:15 – 7:30)
 
-**[TELA: Navegador na interface de Pull Requests do GitHub ou GitLab com PR de exemplo do `plantei-api`]**
+**[TELA: Navegador na interface de Pull Requests do GitHub com o PR real do `plantei-api`]**
+
+![Pull Request Real no plantei-api](../assets/github-actions-pr-view.png)
 
 > "Na cultura DevOps, abandonamos branches longas que duram semanas — conhecidas como o inferno de merge (Merge Hell) — e adotamos o **Trunk-Based Development** ou fluxos de Pull Request curtos e frequentes."
 
-> "Vejam este Pull Request no `plantei-api`: ele altera apenas um controller e seu teste correspondente. A pipeline de CI roda automaticamente."
+> "Vejam na imagem acima o nosso Pull Request real no `plantei-api`: ele integra a branch `gt_m2_d1` diretamente na `main`. A esteira de CI do GitHub Actions foi acionada para garantir que nenhum código não testado passe adiante."
 
 > "E onde a Inteligência Artificial entra nesse fluxo colaborativo?"
 > "Hoje, usamos agentes de IA integrados aos Pull Requests para fazer uma primeira rodada de **Code Review assistido**: ela verifica se há regressões, se padrões de segurança OWASP foram violados e sugere melhorias de clareza antes mesmo de um colega humano revisar."

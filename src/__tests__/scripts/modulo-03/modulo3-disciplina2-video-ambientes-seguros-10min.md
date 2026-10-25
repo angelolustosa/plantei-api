@@ -100,11 +100,8 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3000
-      - DB_HOST=postgres-db
-      - DB_PORT=5432
-      - DB_NAME=plantei_db
-      - DB_USER=postgres
-      - DB_PASS=postgres_secret_123
+      - BASE_URL_DB=postgresql://postgres:postgres_secret_123@postgres-db:5432/plantei_db
+      - DATABASE_URL=postgresql://postgres:postgres_secret_123@postgres-db:5432/plantei_db
       - JWT_SECRET=chave_dev_temporaria_super_segura
     depends_on:
       postgres-db:
@@ -153,17 +150,18 @@ volumes:
 NODE_ENV=development
 PORT=3000
 
-# Banco de Dados PostgreSQL
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=plantei_db
-DB_USER=seu_usuario
-DB_PASS=sua_senha_secreta
+# Banco de Dados PostgreSQL (Padrão Sequelize no plantei-api)
+BASE_URL_DB=postgresql://postgres:senha@localhost:5432/plantei_db
+DATABASE_URL=postgresql://postgres:senha@localhost:5432/plantei_db
 
 # Segurança e Autenticação
 JWT_SECRET=defina_uma_chave_aleatoria_com_mais_de_32_caracteres
 JWT_EXPIRATION=1d
 ```
+
+> "Atenção ao que vai e ao que NÃO vai no `.gitignore`:"
+> - **O que DEVE ser ignorado:** `.env`, `.env.test`, `node_modules` e relatórios de cobertura (`coverage`).
+> - **O que NUNCA deve ser ignorado:** O `package-lock.json`! Se ignorado, pipelines de CI quebram na instalação determinística e no cache de pacotes.
 
 > "E em produção? Em produção ou nas pipelines de CI/CD, os segredos são injetados diretamente através de **GitHub Secrets**, AWS Secrets Manager ou HashiCorp Vault. A aplicação lê transparentemente via `process.env`, sem nenhum segredo gravado em disco."
 

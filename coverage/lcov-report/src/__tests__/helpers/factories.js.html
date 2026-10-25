@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>10/10</span>
+                <span class='fraction'>0/10</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>4/4</span>
+                <span class='fraction'>0/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>4/4</span>
+                <span class='fraction'>0/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>8/8</span>
+                <span class='fraction'>0/8</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -127,9 +127,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -139,9 +139,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -151,7 +151,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -160,7 +160,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -179,9 +179,9 @@
  *
  * @returns {string} CPF com 11 dígitos
  */
-export const gerarCpf = () =&gt; {
-  const base = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
-  return base.slice(-11).padStart(11, '0');
+export const gerarCpf = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
+  const base = <span class="cstat-no" title="statement not covered" >`${Date.now()}${Math.floor(Math.random() * 1000)}`;</span>
+<span class="cstat-no" title="statement not covered" >  return base.slice(-11).padStart(11, '0');</span>
 };
 &nbsp;
 /**
@@ -191,9 +191,9 @@ export const gerarCpf = () =&gt; {
  * @param {string} [dominio='plantei.com'] - Domínio do email
  * @returns {string} Email único
  */
-export const gerarEmail = (prefixo = 'teste', dominio = 'plantei.com') =&gt; {
-  const sufixo = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
-  return `${prefixo}_${sufixo}@${dominio}`;
+export const gerarEmail = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(p</span>refixo = <span class="branch-0 cbranch-no" title="branch not covered" >'teste',</span> dominio = <span class="branch-0 cbranch-no" title="branch not covered" >'plantei.com')</span> =&gt; {</span>
+  const sufixo = <span class="cstat-no" title="statement not covered" >`${Date.now()}${Math.floor(Math.random() * 1000)}`;</span>
+<span class="cstat-no" title="statement not covered" >  return `${prefixo}_${sufixo}@${dominio}`;</span>
 };
 &nbsp;
 /**
@@ -203,7 +203,7 @@ export const gerarEmail = (prefixo = 'teste', dominio = 'plantei.com') =&gt; {
  * @param {object} [overrides={}] - Campos para sobrescrever os valores padrão
  * @returns {object} Payload de usuário
  */
-export const criarUsuarioTeste = (overrides = {}) =&gt; ({
+export const criarUsuarioTeste = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(o</span>verrides = <span class="branch-0 cbranch-no" title="branch not covered" >{})</span> =&gt; (<span class="cstat-no" title="statement not covered" >{</span></span>
   nome: 'Usuário de Teste',
   email: gerarEmail(),
   senha: 'Senha@123',
@@ -212,7 +212,7 @@ export const criarUsuarioTeste = (overrides = {}) =&gt; ({
   ...overrides,
 });
 &nbsp;
-export const criarAdminTeste = (overrides = {}) =&gt; ({
+export const criarAdminTeste = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(o</span>verrides = <span class="branch-0 cbranch-no" title="branch not covered" >{})</span> =&gt; (<span class="cstat-no" title="statement not covered" >{</span></span>
   nome: 'Admin Teste',
   email: gerarEmail('admin'),
   senha: 'Admin@123',
@@ -226,7 +226,7 @@ export const criarAdminTeste = (overrides = {}) =&gt; ({
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-10-19T04:45:42.265Z
+                at 2026-10-25T21:24:20.948Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

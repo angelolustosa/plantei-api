@@ -1,115 +1,144 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
-const mockContato = {
+const contatoModelMock = {
   findAll: jest.fn(),
   findByPk: jest.fn(),
   create: jest.fn(),
 };
 
 jest.unstable_mockModule('../../models/Contato.js', () => ({
-  Contato: mockContato,
+  Contato: contatoModelMock,
 }));
 
 const { default: contatoService } = await import('../../services/contato.service.js');
+const { Contato } = await import('../../models/Contato.js');
 
-describe('ContatoService (Unit)', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+describe('contatoService', () => {
+  beforeEach(() => jest.clearAllMocks());
 
-  describe('listar', () => {
-    it('deve listar todos os contatos', async () => {
-      const listaFalsa = [{ id: 1, nome: 'Maria' }, { id: 2, nome: 'João' }];
-      mockContato.findAll.mockResolvedValue(listaFalsa);
+  describe('listar()', () => {
+    it('deve chamar Contato.findAll() e retornar a lista de contatos', async () => {
+      // Arrange
+      const contatos = [{ id: 1, nome: 'Ana Silva' }, { id: 2, nome: 'João Souza' }];
+      Contato.findAll.mockResolvedValue(contatos);
 
+      // Act
       const resultado = await contatoService.listar();
 
-      expect(mockContato.findAll).toHaveBeenCalledTimes(1);
-      expect(resultado).toEqual(listaFalsa);
+      // Assert
+      expect(Contato.findAll).toHaveBeenCalledTimes(1);
+      expect(resultado).toBe(contatos);
     });
   });
 
-  describe('buscarPorId', () => {
-    it('deve retornar contato quando id existir', async () => {
-      const contatoFalso = { id: 10, nome: 'Ana' };
-      mockContato.findByPk.mockResolvedValue(contatoFalso);
+  describe('buscarPorId()', () => {
+    it('deve chamar Contato.findByPk(id) e retornar o contato encontrado', async () => {
+      // Arrange
+      const id = 1;
+      const contato = { id, nome: 'Ana Silva' };
+      Contato.findByPk.mockResolvedValue(contato);
 
-      const resultado = await contatoService.buscarPorId(10);
+      // Act
+      const resultado = await contatoService.buscarPorId(id);
 
-      expect(mockContato.findByPk).toHaveBeenCalledWith(10);
-      expect(resultado).toEqual(contatoFalso);
+      // Assert
+      expect(Contato.findByPk).toHaveBeenCalledWith(id);
+      expect(resultado).toBe(contato);
     });
 
-    it('deve retornar null quando contato não existir', async () => {
-      mockContato.findByPk.mockResolvedValue(null);
+    it('deve retornar null quando o contato não existir', async () => {
+      // Arrange
+      const id = 99;
+      Contato.findByPk.mockResolvedValue(null);
 
-      const resultado = await contatoService.buscarPorId(999);
+      // Act
+      const resultado = await contatoService.buscarPorId(id);
 
-      expect(mockContato.findByPk).toHaveBeenCalledWith(999);
+      // Assert
+      expect(Contato.findByPk).toHaveBeenCalledWith(id);
       expect(resultado).toBeNull();
     });
   });
 
-  describe('criar', () => {
-    it('deve criar um novo contato com sucesso', async () => {
-      const payload = { nome: 'Carlos', email: 'carlos@plantei.com', mensagem: 'Dúvida' };
-      const criado = { id: 1, ...payload };
-      mockContato.create.mockResolvedValue(criado);
+  describe('criar()', () => {
+    it('deve chamar Contato.create(payload) e retornar o contato criado', async () => {
+      // Arrange
+      const payload = {
+        nome: 'Ana Silva',
+        email: 'ana@example.com',
+        mensagem: 'Olá!',
+      };
+      const contatoCriado = { id: 1, ...payload };
+      Contato.create.mockResolvedValue(contatoCriado);
 
+      // Act
       const resultado = await contatoService.criar(payload);
 
-      expect(mockContato.create).toHaveBeenCalledWith(payload);
-      expect(resultado).toEqual(criado);
+      // Assert
+      expect(Contato.create).toHaveBeenCalledWith(payload);
+      expect(resultado).toBe(contatoCriado);
     });
   });
 
-  describe('atualizar', () => {
-    it('deve atualizar contato existente', async () => {
-      const instanciaMock = {
-        id: 1,
-        nome: 'Antigo',
-        update: jest.fn().mockResolvedValue(true),
-      };
-      mockContato.findByPk.mockResolvedValue(instanciaMock);
+  describe('atualizar()', () => {
+    it('deve retornar null quando o contato não existir', async () => {
+      // Arrange
+      const id = 99;
+      const payload = { nome: 'Nome atualizado' };
+      Contato.findByPk.mockResolvedValue(null);
 
-      const payload = { nome: 'Novo Nome' };
-      const resultado = await contatoService.atualizar(1, payload);
+      // Act
+      const resultado = await contatoService.atualizar(id, payload);
 
-      expect(mockContato.findByPk).toHaveBeenCalledWith(1);
-      expect(instanciaMock.update).toHaveBeenCalledWith(payload);
-      expect(resultado).toBe(instanciaMock);
-    });
-
-    it('deve retornar null ao tentar atualizar contato inexistente', async () => {
-      mockContato.findByPk.mockResolvedValue(null);
-
-      const resultado = await contatoService.atualizar(999, { nome: 'Novo' });
-
+      // Assert
+      expect(Contato.findByPk).toHaveBeenCalledWith(id);
       expect(resultado).toBeNull();
     });
+
+    it('deve atualizar e retornar o contato quando ele existir', async () => {
+      // Arrange
+      const id = 1;
+      const payload = { nome: 'Ana Silva Atualizada' };
+      const contato = { id, nome: 'Ana Silva', update: jest.fn() };
+      Contato.findByPk.mockResolvedValue(contato);
+      contato.update.mockResolvedValue(contato);
+
+      // Act
+      const resultado = await contatoService.atualizar(id, payload);
+
+      // Assert
+      expect(contato.update).toHaveBeenCalledWith(payload);
+      expect(resultado).toBe(contato);
+    });
   });
 
-  describe('remover', () => {
-    it('deve remover contato existente e retornar true', async () => {
-      const instanciaMock = {
-        id: 1,
-        destroy: jest.fn().mockResolvedValue(true),
-      };
-      mockContato.findByPk.mockResolvedValue(instanciaMock);
+  describe('remover()', () => {
+    it('deve retornar null quando o contato não existir', async () => {
+      // Arrange
+      const id = 99;
+      Contato.findByPk.mockResolvedValue(null);
 
-      const resultado = await contatoService.remover(1);
+      // Act
+      const resultado = await contatoService.remover(id);
 
-      expect(mockContato.findByPk).toHaveBeenCalledWith(1);
-      expect(instanciaMock.destroy).toHaveBeenCalledTimes(1);
+      // Assert
+      expect(Contato.findByPk).toHaveBeenCalledWith(id);
+      expect(resultado).toBeNull();
+    });
+
+    it('deve excluir o contato e retornar true quando ele existir', async () => {
+      // Arrange
+      const id = 1;
+      const contato = { id, destroy: jest.fn() };
+      Contato.findByPk.mockResolvedValue(contato);
+      contato.destroy.mockResolvedValue(undefined);
+
+      // Act
+      const resultado = await contatoService.remover(id);
+
+      // Assert
+      expect(contato.destroy).toHaveBeenCalledTimes(1);
       expect(resultado).toBe(true);
-    });
-
-    it('deve retornar null ao tentar remover contato inexistente', async () => {
-      mockContato.findByPk.mockResolvedValue(null);
-
-      const resultado = await contatoService.remover(999);
-
-      expect(resultado).toBeNull();
     });
   });
 });

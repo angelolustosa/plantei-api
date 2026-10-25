@@ -7,7 +7,11 @@
   "scripts": {
     "start": "nodemon ./src/server.js",
     "seed": "node ./src/seeders/seed.js",
+    "lint": "eslint src/ --ext .js",
+    "lint:fix": "eslint src/ --ext .js --fix",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:quick": "npm test -- --bail --findRelatedTests",
+    "check:all": "npm run lint && npm test",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
     "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"
   },

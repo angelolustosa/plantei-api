@@ -161,7 +161,7 @@ jobs:
 
 ---
 
-### 7:30 – 10:00 | Definindo os Steps: Checkout, Node.js e Execução dos Testes
+### 7:30 – 10:00 | Definindo os Steps: Checkout, Node.js, Seed e Execução dos Testes
 **[TELA: Completar os `steps` do arquivo `ci.yml`]**
 
 ```yaml
@@ -178,18 +178,41 @@ jobs:
       - name: 📦 Instalar dependências
         run: npm ci
 
+      - name: 🌱 Sincronizar e popular banco de testes
+        env:
+          NODE_ENV: test
+          BASE_URL_DB: postgres://postgres:postgrespassword@localhost:5432/plantei_test
+          DATABASE_URL: postgres://postgres:postgrespassword@localhost:5432/plantei_test
+          JWT_SECRET: super_secret_jwt_key_para_testes_automatizados_ci
+        run: npm run seed
+
       - name: 🧪 Executar testes com relatório de cobertura
         env:
           NODE_ENV: test
+          BASE_URL_DB: postgres://postgres:postgrespassword@localhost:5432/plantei_test
           DATABASE_URL: postgres://postgres:postgrespassword@localhost:5432/plantei_test
           JWT_SECRET: super_secret_jwt_key_para_testes_automatizados_ci
         run: npm run test:coverage
 ```
 
-> "Vejam três detalhes essenciais:
+> "Vejam quatro detalhes essenciais aprendidos na prática de engenharia:
 > 1. `npm ci` em vez de `npm install`: O `npm ci` é feito especificamente para pipelines; ele respeita estritamente o `package-lock.json`, garantindo builds 100% determinísticos.
 > 2. `cache: 'npm'`: O GitHub salva em cache os pacotes já baixados. A segunda execução da pipeline roda em metade do tempo!
-> 3. As variáveis de ambiente do banco apontam para `localhost:5432` com o banco `plantei_test` criado pelo contêiner."
+> 3. `🌱 Sincronizar e popular banco de testes` (`npm run seed`): O container PostgreSQL inicia completamente vazio. Sem rodar o `seed` antes dos testes de integração, as tabelas (`usuarios`, `produtos`, `perfil`) e perfis com chaves estrangeiras não existiriam, causando falhas nos testes com Supertest.
+> 4. `BASE_URL_DB` e `DATABASE_URL`: Injetamos as credenciais locais do container (`localhost:5432/plantei_test`). No `database.js`, configuramos o SSL condicional: apenas bancos remotos com `sslmode=require` (como Neon) usam SSL, permitindo que o container local rode livremente sem erros de certificado."
+
+---
+
+### 🚨 CASO REAL DE TROUBLESHOOTING: A Armadilha do `package-lock.json`
+**[TELA: Exibir print do erro de Lockfile no GitHub Actions]**
+
+![Erro de Lock File no GitHub Actions](../assets/github-actions-lockfile-error.png)
+
+> "Atenção a esta armadilha clássica que derruba milhares de pipelines:
+> Se o arquivo `package-lock.json` estiver acidentalmente dentro do `.gitignore`, ele nunca é enviado ao GitHub.
+> Quando o step `Configurar Node.js (v20)` tenta ativar o `cache: 'npm'` ou o `npm ci`, a esteira quebra com o erro:
+> `Error: Dependencies lock file is not found in /home/runner/work/plantei-api... Supported file patterns: package-lock.json`
+> **A regra de ouro:** O `package-lock.json` SEMPRE deve ser versionado no Git!"
 
 ---
 
@@ -197,8 +220,8 @@ jobs:
 **[TELA: Executar no terminal do VS Code e alternar para o navegador]**
 
 ```bash
-git add .github/workflows/ci.yml
-git commit -m "ci: adiciona pipeline github actions com postgres service"
+git add .github/workflows/ci.yml .gitignore package-lock.json src/config/database.js
+git commit -m "ci: adiciona pipeline github actions com postgres service e seed"
 git push origin gt_m2_d1
 ```
 
@@ -358,9 +381,11 @@ git push origin feature/novo-teste-produto
 
 **[TELA: Tela do Pull Request no GitHub]**
 
-> "Vejam o Pull Request aberto. Embaixo, aparece a seção de checks:"
+![Pull Request no GitHub Actions](../assets/github-actions-pr-view.png)
+
+> "Vejam o Pull Request aberto no repositório `plantei-api`. Embaixo, aparece a seção de checks conectada diretamente à branch de trabalho:"
 >
-> - `Executar Testes & Qualidade — In progress...` (rodando em background)
+> - `CI Plantei API - Quality & Tests — In progress...` (rodando o container Postgres e os testes em background).
 > - Se os testes passarem: `All checks have passed` (Botão de Merge habilitado).
 > - Se houver falha de cobertura ou erro de teste: `Checks failed` (Botão de Merge bloqueado com alerta vermelho).
 

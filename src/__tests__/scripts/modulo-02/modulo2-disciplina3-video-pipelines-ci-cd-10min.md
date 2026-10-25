@@ -54,16 +54,17 @@ Desenvolvedor faz PUSH / Abre PR
 
 > "Vamos criar a estrutura no `plantei-api`. Na raiz do projeto, criamos a pasta `.github/workflows/` e o arquivo `ci.yml`."
 
-> "Vejam como a configuração é limpa e declarativa:"
+> "Vejam como a configuração é limpa, declarativa e pronta para ambiente corporativo:"
 
 ```yaml
 name: CI Plantei API - Quality & Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ gt_m2_d1, main, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ gt_m2_d1, main ]
+  workflow_dispatch:
 
 jobs:
   test-and-verify:
@@ -85,31 +86,53 @@ jobs:
           --health-retries 5
 
     steps:
-      - name: Checkout do código
+      - name: 📥 Clonar repositório (Checkout)
         uses: actions/checkout@v4
 
-      - name: Configurar Node.js v20
+      - name: 🟢 Configurar Node.js (v20)
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
 
-      - name: Instalar dependências
+      - name: 📦 Instalar dependências
         run: npm ci
 
-      - name: Executar Testes Unitários e Integração com Cobertura
+      - name: 🌱 Sincronizar e popular banco de testes
         env:
           NODE_ENV: test
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_USER: postgres
-          DB_PASSWORD: postgrespassword
-          DB_NAME: plantei_test
-          JWT_SECRET: ${{ secrets.JWT_SECRET || 'chave-secreta-ci-temporaria' }}
+          BASE_URL_DB: postgres://postgres:postgrespassword@localhost:5432/plantei_test
+          DATABASE_URL: postgres://postgres:postgrespassword@localhost:5432/plantei_test
+          JWT_SECRET: super_secret_jwt_key_para_testes_automatizados_ci
+        run: npm run seed
+
+      - name: 🧪 Executar testes com relatório de cobertura
+        env:
+          NODE_ENV: test
+          BASE_URL_DB: postgres://postgres:postgrespassword@localhost:5432/plantei_test
+          DATABASE_URL: postgres://postgres:postgrespassword@localhost:5432/plantei_test
+          JWT_SECRET: super_secret_jwt_key_para_testes_automatizados_ci
         run: npm run test:coverage
 ```
 
-> "Olha que espetacular: o GitHub Actions sobe um container oficial do Postgres usando `services`, espera o banco ficar saudável (`pg_isready`), injeta as variáveis seguras e roda toda a nossa suíte de testes com cobertura."
+> "Olha que espetacular os detalhes essenciais dessa esteira:
+> 1. O GitHub Actions sobe um container oficial do Postgres usando `services` e espera o banco ficar saudável (`pg_isready`).
+> 2. `npm ci` e `cache: 'npm'`: Instalação rápida e estrita pelo `package-lock.json`.
+> 3. `🌱 Sincronizar e popular banco de testes`: Como o container Postgres sobe limpo, rodamos `npm run seed` para criar tabelas e dados iniciais (perfis, permissões) antes dos testes.
+> 4. `BASE_URL_DB`: Injeta a URL do PostgreSQL local sem SSL (já que Docker local não usa SSL, ao contrário do Neon na nuvem)."
+
+---
+
+### 🚨 CASO REAL DE TROUBLESHOOTING: O Erro de Lockfile no GitHub Actions
+**[TELA: Exibir print do erro real com falha no step de Setup-Node]**
+
+![Erro de Lock File no GitHub Actions](../assets/github-actions-lockfile-error.png)
+
+> "Atenção a este erro real que você certamente vai encontrar na carreira:
+> Se o arquivo `package-lock.json` estiver acidentalmente listado no seu `.gitignore`, ele não subirá para o repositório remoto.
+> Ao tentar rodar `setup-node` com `cache: 'npm'`, a pipeline quebra em segundos com:
+> `Error: Dependencies lock file is not found in /home/runner/work/plantei-api... Supported file patterns: package-lock.json`
+> **A correção é imediata:** Remova o `package-lock.json` do `.gitignore`, faça o commit dele e reenvie com `git push`!"
 
 ---
 
@@ -146,17 +169,20 @@ jobs:
 
 ## 🔒 PARTE 4 — Boas Práticas: Segredos e Proteção de Branch (7:30 – 8:45)
 
-**[TELA: Navegador mostrando GitHub Repo -> Settings -> Branches / Secrets]**
+**[TELA: Navegador mostrando GitHub Repo -> Pull Requests e Settings -> Branches / Secrets]**
+
+![Pull Request com GitHub Actions no plantei-api](../assets/github-actions-pr-view.png)
 
 > "Duas regras inegociáveis para fechar com chave de ouro:
-> 1. **Segredos nunca vão para o Git:** Chaves de API, senhas e tokens JWT são configurados em **Settings → Secrets and variables → Actions** e chamados via `${{ secrets.NOME_DO_SEGREDO }}`.
+> 1. **Segredos nunca vão para o Git:** Chaves de API, senhas e tokens JWT são configurados em **Settings → Secrets and variables → Actions** ou injetados estritamente no ambiente do runner.
 > 2. **Branch Protection Rules:** Ative a opção *Require status checks to pass before merging*. Assim, o GitHub desativa o botão de merge caso o job do CI falhe."
 
 ```text
 [ Require status checks to pass before merging ]
-  ☑ test-and-verify (CI Plantei API)
+  ☑ test-and-verify (CI Plantei API - Quality & Tests)
 ```
 
+> "Vejam na imagem acima o Pull Request aberto no projeto `plantei-api`. O GitHub Actions assume o controle da validação, garantindo que o botão verde de merge só fique liberado após todos os testes passarem."
 > "Com essa configuração, seu repositório atinge o nível de maturidade das maiores empresas de tecnologia."
 
 ---
