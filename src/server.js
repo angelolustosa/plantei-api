@@ -5,6 +5,8 @@ import { HOST } from './utils/ip.js';
 const PORT = process.env.PORT || 5000;
 // const HOST = process.env.HOST || 'localhost';
 
+
+//Configurando a aplicação para iniciar o servidor e conectar ao banco de dados
 (async () => {
   try {
     await sequelize.authenticate();
