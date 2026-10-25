@@ -5,6 +5,7 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   test-and-verify:
@@ -26,25 +27,30 @@ jobs:
           --health-retries 5
 
     steps:
-      - name: Checkout do código
+      - name: 📥 Clonar repositório (Checkout)
         uses: actions/checkout@v4
 
-      - name: Configurar Node.js v20
+      - name: 🟢 Configurar Node.js (v20)
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
 
-      - name: Instalar dependências
+      - name: 📦 Instalar dependências
         run: npm ci
 
-      - name: Executar Testes Unitários e Integração com Cobertura
+      - name: 🌱 Sincronizar e popular banco de testes
         env:
           NODE_ENV: test
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_USER: postgres
-          DB_PASSWORD: postgrespassword
-          DB_NAME: plantei_test
-          JWT_SECRET: ${{ secrets.JWT_SECRET || 'chave-secreta-ci-temporaria' }}
+          BASE_URL_DB: postgres://postgres:postgrespassword@localhost:5432/plantei_test
+          DATABASE_URL: postgres://postgres:postgrespassword@localhost:5432/plantei_test
+          JWT_SECRET: super_secret_jwt_key_para_testes_automatizados_ci
+        run: npm run seed
+
+      - name: 🧪 Executar testes com relatório de cobertura
+        env:
+          NODE_ENV: test
+          BASE_URL_DB: postgres://postgres:postgrespassword@localhost:5432/plantei_test
+          DATABASE_URL: postgres://postgres:postgrespassword@localhost:5432/plantei_test
+          JWT_SECRET: super_secret_jwt_key_para_testes_automatizados_ci
         run: npm run test:coverage
