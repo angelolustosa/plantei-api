@@ -27,21 +27,27 @@
 
 > "A **Integração Contínua (CI)** é a prática onde cada alteração enviada ao repositório dispara automaticamente uma esteira de validação em um ambiente limpo e isolado:"
 
-```text
-Desenvolvedor faz PUSH / Abre PR
-         │
-         ▼
-[ Runner GitHub Actions (Ubuntu) ]
-  ├── 1. Checkout do código
-  ├── 2. Instalação de dependências limpas (npm ci)
-  ├── 3. Subida de Container de Banco (PostgreSQL)
-  ├── 4. Execução dos Testes Automatizados (npm test)
-  └── 5. Validação de Quality Gate (Cobertura mínima >= 70%)
-         │
-   ┌─────┴─────┐
-   ▼           ▼
-✅ Passou    ❌ Falhou
-(Liberado)  (Merge bloqueado!)
+```mermaid
+flowchart TD
+    Dev(["👨‍💻 Desenvolvedor"]) -->|"git push ou Abre PR"| Trigger{"Gatilho GitHub Actions"}
+
+    subgraph Runner ["🏃 Runner GitHub Actions (ubuntu-latest)"]
+        direction TB
+        Step1["📥 1. Checkout do Código (actions/checkout@v4)"]
+        Step2["🟢 2. Setup Node.js v20 + Cache npm"]
+        Step3["📦 3. Instalar Dependências (npm ci)"]
+        Step4[("🐘 4. Subir PostgreSQL Service Container")]
+        Step5["🌱 5. Sincronizar e Popular Banco (npm run seed)"]
+        Step6["🧪 6. Executar Testes e Cobertura (npm run test:coverage)"]
+        Gate{"🛡️ 7. Validação de Quality Gates (Cobertura >= 70%)"}
+
+        Step1 --> Step2 --> Step3 --> Step4 --> Step5 --> Step6 --> Gate
+    end
+
+    Trigger --> Step1
+
+    Gate -->|"✅ Passou nos Testes e Metas Atingidas"| Success["✅ Pipeline SUCESSO (Pull Request Liberado para Merge)"]
+    Gate -->|"❌ Teste Falhou ou Cobertura Insuficiente"| Failure["❌ Pipeline FALHOU (Merge Bloqueado no GitHub!)"]
 ```
 
 > "Se um teste quebrar ou a cobertura cair abaixo da meta estipulada, a pipeline fica vermelha e **ninguém consegue mesclar o código na branch principal**. Isso é proteção real de produto."

@@ -38,22 +38,27 @@
 ### 1:30 – 5:00 | O Ciclo da Integração Contínua
 **[TELA: Exibir diagrama de fluxo de CI/CD no editor ou slide]**
 
-```text
- ┌──────────────┐     git push      ┌───────────────────────────────────────────────┐
- │ Desenvolvedor│ ────────────────> │              GITHUB ACTIONS                   │
- └──────────────┘                   │                                               │
-                                    │  1. Checkout do Código (git fetch)            │
-                                    │  2. Setup do Node.js (v20) + Cache npm        │
-                                    │  3. Subir Banco de Dados (PostgreSQL Service) │
-                                    │  4. Executar Migrations / Seeders             │
-                                    │  5. Executar npm test                         │
-                                    │  6. Validar Quality Gates (Coverage >= 70%)   │
-                                    └───────────────────────┬───────────────────────┘
-                                                            │
-                                         ┌──────────────────┴──────────────────┐
-                                         ▼                                     ▼
-                                  ✅ Pipeline SUCESSO                  ❌ Pipeline FALHOU
-                               (Pull Request Liberado)               (Merge Bloqueado!)
+```mermaid
+flowchart TD
+    Dev(["👨‍💻 Desenvolvedor"]) -->|"git push ou Abre PR"| Trigger{"Gatilho GitHub Actions"}
+
+    subgraph Runner ["🏃 Runner GitHub Actions (ubuntu-latest)"]
+        direction TB
+        Step1["📥 1. Checkout do Código (actions/checkout@v4)"]
+        Step2["🟢 2. Setup Node.js v20 + Cache npm"]
+        Step3["📦 3. Instalar Dependências (npm ci)"]
+        Step4[("🐘 4. Subir PostgreSQL Service Container")]
+        Step5["🌱 5. Sincronizar e Popular Banco (npm run seed)"]
+        Step6["🧪 6. Executar Testes e Cobertura (npm run test:coverage)"]
+        Gate{"🛡️ 7. Validação de Quality Gates (Cobertura >= 70%)"}
+
+        Step1 --> Step2 --> Step3 --> Step4 --> Step5 --> Step6 --> Gate
+    end
+
+    Trigger --> Step1
+
+    Gate -->|"✅ Passou nos Testes e Metas Atingidas"| Success["✅ Pipeline SUCESSO (Pull Request Liberado para Merge)"]
+    Gate -->|"❌ Teste Falhou ou Cobertura Insuficiente"| Failure["❌ Pipeline FALHOU (Merge Bloqueado no GitHub!)"]
 ```
 
 > "Continuous Integration não é uma ferramenta. É uma prática cultural:
