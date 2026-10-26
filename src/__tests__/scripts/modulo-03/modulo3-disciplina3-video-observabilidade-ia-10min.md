@@ -27,18 +27,13 @@
 
 > "A observabilidade moderna repousa sobre uma tríade fundamental:"
 
-```text
-               ┌───────────────────────┐
-               │    OBSERVABILIDADE    │
-               └───────────┬───────────┘
-         ┌─────────────────┼─────────────────┐
-         ▼                 ▼                 ▼
-   ┌───────────┐     ┌───────────┐     ┌───────────┐
-   │   LOGS    │     │  MÉTRICAS │     │  TRACES   │
-   │ O que     │     │ Saúde     │     │ Por onde  │
-   │ aconteceu │     │ agregada  │     │ passou a  │
-   │ em detalhe│     │ numérica  │     │ requisição│
-   └───────────┘     └───────────┘     └───────────┘
+```mermaid
+flowchart TD
+    OBS["OBSERVABILIDADE"]
+    
+    OBS --> LOGS["<b>LOGS</b><br/>O que aconteceu<br/>em detalhe"]
+    OBS --> METRICAS["<b>MÉTRICAS</b><br/>Saúde agregada<br/>numérica"]
+    OBS --> TRACES["<b>TRACES</b><br/>Por onde passou<br/>a requisição"]
 ```
 
 > "1. **Logs Estruturados:** Registros de eventos com contexto semântico (timestamp, nível de severidade, ID do usuário, correlation ID, rota)."
@@ -107,19 +102,20 @@ export default logger;
 
 ```javascript
 // src/controllers/health.controller.js
-import sequelize from '../config/database.js';
+import { sequelize } from '../config/database.js';
 
-export const checkHealth = async (req, res) => {
+export const healthCheck = async (req, res) => {
   const healthStatus = {
     status: 'UP',
+    service: 'plantei-api',
     timestamp: new Date().toISOString(),
     uptimeSeconds: Math.floor(process.uptime()),
     memoryUsageMB: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
-    database: 'UNKNOWN'
+    database: 'UNKNOWN',
   };
 
   try {
-    // Testa a conexão real com o PostgreSQL executando um ping simples
+    // Verifica a conexão real com o PostgreSQL
     await sequelize.authenticate();
     healthStatus.database = 'CONNECTED';
     return res.status(200).json(healthStatus);
@@ -132,7 +128,18 @@ export const checkHealth = async (req, res) => {
 };
 ```
 
-**[TELA: Executar `curl http://localhost:3000/api/health` no terminal e ver o JSON de resposta com banco conectado]**
+**[TELA: Abrir o navegador em `http://localhost:3000/api/health` ou executar `curl http://localhost:3000/api/health` e mostrar a resposta:]**
+
+```json
+{
+  "status": "UP",
+  "service": "plantei-api",
+  "timestamp": "2026-10-25T22:50:00.000Z",
+  "uptimeSeconds": 42,
+  "memoryUsageMB": 38,
+  "database": "CONNECTED"
+}
+```
 
 > "Se o PostgreSQL estiver inacessível, a API responde HTTP 503 Service Unavailable, acionando alertas antes que o usuário final receba erros inesperados."
 

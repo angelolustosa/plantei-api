@@ -6,7 +6,7 @@ import authRoutes from './auth.routes.js';
 
 const router = Router();
 
-router.use('/', healthRoutes);          // Health check
+router.use('/health', healthRoutes);          // Health check (/api/health)
 router.use('/produtos', produtoRoutes);
 router.use('/contatos', contatoRoutes);
 router.use('/auth', authRoutes);  // Rotas de autenticação
