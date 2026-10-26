@@ -61,34 +61,38 @@ const logger = winston.createLogger({
     winston.format.errors({ stack: true }),
     winston.format.json()
   ),
-  defaultMeta: { service: 'plantei-api', environment: process.env.NODE_ENV },
+  defaultMeta: { service: 'plantei-api', environment: process.env.NODE_ENV || 'development' },
   transports: [
     new winston.transports.Console()
   ]
 });
 
+// Compatibilidade com os controllers existentes
+export const log = {
+  info: (msg) => logger.info(msg),
+  success: (msg) => logger.info(`[SUCCESS] ${msg}`),
+  warn: (msg) => logger.warn(msg),
+  error: (err) => logger.error(err instanceof Error ? err.stack || err.message : err),
+};
+
 export default logger;
 ```
 
-**[TELA: Executar uma chamada à API e exibir a saída JSON formatada no terminal]**
+**[TELA: Chamar `http://localhost:3000/api/produtos` e mostrar a linha JSON impressa no terminal]**
 
-> "Vejam a diferença de um log gerado durante uma requisição:"
+> "Vejam a diferença de um log gerado durante uma requisição real de listagem de produtos:"
 
 ```json
 {
-  "timestamp": "2026-10-22 21:30:15",
-  "level": "error",
-  "message": "Falha na autenticação: senha inválida",
   "service": "plantei-api",
-  "environment": "production",
-  "correlationId": "req-98f2b3e1-44ab",
-  "userId": 42,
-  "endpoint": "/api/auth/login",
-  "statusCode": 401
+  "environment": "development",
+  "level": "info",
+  "message": "[Produto] Listando produtos",
+  "timestamp": "2026-10-25 23:00:15"
 }
 ```
 
-> "Qualquer ferramenta de agregação de logs — como Datadog, Grafana Loki, CloudWatch ou Elasticsearch — consegue filtrar instantaneamente esse evento por `correlationId` ou `userId`."
+> "Qualquer ferramenta de agregação de logs — como Datadog, Grafana Loki, CloudWatch ou Elasticsearch — consegue filtrar instantaneamente esse evento por `service`, `level` ou timestamp."
 
 ---
 

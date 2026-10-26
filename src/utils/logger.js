@@ -1,47 +1,25 @@
-const colors = {
-  reset: '\x1b[0m',
-  blue: '\x1b[34m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  red: '\x1b[31m',
-};
+import winston from 'winston';
 
-function format(level, message) {
-  const time = new Date().toISOString();
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: winston.format.combine(
+    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    winston.format.errors({ stack: true }),
+    winston.format.json()
+  ),
+  defaultMeta: { service: 'plantei-api', environment: process.env.NODE_ENV || 'development' },
+  transports: [
+    new winston.transports.Console()
+  ]
+});
 
-  return `[${time}] ${level}: ${message}`;
-}
-
+// Compatibilidade com os controllers existentes (log.info, log.success, etc.)
 export const log = {
-  info(message) {
-    console.log(
-      colors.blue + format('INFO', message) + colors.reset
-    );
-  },
-
-  success(message) {
-    console.log(
-      colors.green + format('SUCCESS', message) + colors.reset
-    );
-  },
-
-  warn(message) {
-    console.warn(
-      colors.yellow + format('WARN', message) + colors.reset
-    );
-  },
-
-  error(error) {
-    if (error instanceof Error) {
-      console.error(
-        colors.red +
-          format('ERROR', `${error.message}\n${error.stack}`) +
-          colors.reset
-      );
-    } else {
-      console.error(
-        colors.red + format('ERROR', error) + colors.reset
-      );
-    }
-  },
+  info: (msg) => logger.info(msg),
+  success: (msg) => logger.info(`[SUCCESS] ${msg}`),
+  warn: (msg) => logger.warn(msg),
+  error: (err) => logger.error(err instanceof Error ? err.stack || err.message : err),
 };
+
+export { logger };
+export default logger;
