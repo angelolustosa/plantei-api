@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      target: runner
+    container_name: plantei-api-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - BASE_URL_DB=postgresql://postgres:postgres_secret_123@postgres-db:5432/plantei_db
+      - DATABASE_URL=postgresql://postgres:postgres_secret_123@postgres-db:5432/plantei_db
+      - JWT_SECRET=chave_dev_temporaria_super_segura
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: plantei-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: plantei_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_secret_123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d plantei_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

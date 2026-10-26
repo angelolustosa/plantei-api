@@ -173,21 +173,48 @@ JWT_EXPIRATION=1d
 
 > "Gerenciar ambientes seguros também significa garantir que nenhuma dependência com brecha de segurança conhecida entre no pacote final."
 
-> "No terminal, rodamos regularmente:"
+> "No terminal, rodamos regularmente a auditoria das dependências do Node:"
 
 ```bash
 npm audit --production
 ```
 
-> "E na pipeline de CI ou localmente, inspecionamos a própria imagem Docker com o scanner de vulnerabilidades **Trivy**:"
+> "Mas e as vulnerabilidades do próprio sistema operacional ou pacotes da imagem base? Para isso, inspecionamos o container com o **Trivy**, uma das ferramentas de varredura mais respeitadas do mercado."
+
+> "Antes de rodar a varredura, precisamos garantir que a imagem local esteja construída:"
 
 ```bash
-docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image plantei-api:latest
+docker build -t plantei-api:latest .
 ```
 
-> "O Trivy vasculha tanto os pacotes do sistema operacional Alpine quanto as bibliotecas do Node.js, emitindo um relatório claro de vulnerabilidades CVE (Common Vulnerabilities and Exposures)."
+> "Agora, podemos pedir para o Trivy analisar a imagem e exportar um relatório HTML completo e visual direto na raiz do projeto:"
 
-> "Se surgir uma vulnerabilidade crítica, a esteira falha imediatamente, impedindo que uma imagem comprometida chegue a qualquer ambiente."
+```powershell
+# No PowerShell / CMD:
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${PWD}:/report aquasec/trivy image --format template --template "@contrib/html.tpl" -o /report/trivy-report.html plantei-api:latest
+```
+
+> ⚠️ **Atenção no Git Bash (MINGW64 / Windows):** No Git Bash, qualquer argumento que comece com `/` (inclusive o `-o /report/...`) é convertido automaticamente pelo MSYS para `C:\Program Files\Git\...`, causando o erro `failed to create output file: open C:/Program Files/Git/report/... no such file or directory`.
+> Para desativar essa conversão automática, use a variável `MSYS_NO_PATHCONV=1` e obtenha o caminho Windows via `$(pwd -W)`:
+> ```bash
+> # No Git Bash (Recomendado):
+> MSYS_NO_PATHCONV=1 docker run --rm \
+>  -v /var/run/docker.sock:/var/run/docker.sock \
+>  -v "$(pwd -W):/report" \
+>  aquasec/trivy image \
+>  --format template --template "@contrib/html.tpl" \
+>  -o /report/trivy-report.html \
+>  plantei-api:latest
+> ```
+> *(Alternativa no Git Bash: colocar barra dupla `//` em todos os caminhos que começam com `/`: `//var/run/docker.sock`, `//report` e no output `-o //report/trivy-report.html`)*.
+
+**[TELA: Navegador abrindo o arquivo `trivy-report.html` gerado na raiz]**
+
+![Relatório Visual do Trivy no Navegador](../assets/trivy-report-browser.png)
+
+> "Vejam que incrível este relatório gerado: ele lista pacote por pacote (como o `libcrypto3`), a classificação de severidade (HIGH, MEDIUM), a versão instalada, a versão corrigida (Fixed Version) e os links diretos para as bases oficiais de CVE (Common Vulnerabilities and Exposures)."
+
+> "Se surgir uma vulnerabilidade crítica sem justificativa ou mitigação, a esteira de CI falha imediatamente, impedindo que uma imagem comprometida chegue a qualquer ambiente de homologação ou produção."
 
 ---
 
@@ -211,5 +238,5 @@ docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image
 - [ ] **1:00** Apresentar o `Dockerfile` multi-stage: explicar builder vs runner, Alpine e `USER node`.
 - [ ] **3:30** Demonstrar o `docker-compose.yml`, healthchecks do Postgres e subir com `docker-compose up -d`.
 - [ ] **5:45** Mostrar a segregação entre `.env` (ignorado) e `.env.example` (versionado).
-- [ ] **7:30** Executar `npm audit` e explicar a checagem de vulnerabilidades com Trivy no pipeline.
+- [ ] **7:30** Realizar o build (`docker build`), executar o Trivy exportando relatório HTML (destacando o cuidado com `//` no Git Bash) e abrir o `trivy-report.html` no navegador.
 - [ ] **8:50** Conclusão e gancho direto para a Disciplina 3 (Observabilidade e IA).
