@@ -13,12 +13,20 @@ const logger = winston.createLogger({
   ]
 });
 
-// Compatibilidade com os controllers existentes (log.info, log.success, etc.)
+// Suporte a logs simples ou com metadados (correlationId, userId, endpoint, etc.)
 export const log = {
-  info: (msg) => logger.info(msg),
-  success: (msg) => logger.info(`[SUCCESS] ${msg}`),
-  warn: (msg) => logger.warn(msg),
-  error: (err) => logger.error(err instanceof Error ? err.stack || err.message : err),
+  info: (msg, meta = {}) => logger.info(msg, meta),
+  success: (msg, meta = {}) => logger.info(`[SUCCESS] ${msg}`, meta),
+  warn: (msg, meta = {}) => logger.warn(msg, meta),
+  error: (err, meta = {}) => {
+    if (err instanceof Error) {
+      logger.error(err.message, { stack: err.stack, ...meta });
+    } else if (typeof err === 'object' && err !== null) {
+      logger.error(err.message || 'Error', { ...err, ...meta });
+    } else {
+      logger.error(err, meta);
+    }
+  },
 };
 
 export { logger };
