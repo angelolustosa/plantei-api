@@ -1,19 +1,28 @@
 import cors from 'cors';
 
-// Configuração do CORS
-//app.use(cors()); // 👈 libera tudo
+const PORT = process.env.PORT || 5000;
+const HOST = process.env.HOST || 'localhost';
 
 const allowedOrigins = [
   'http://localhost:5173',   // Vite padrão
   'http://127.0.0.1:5173',
-  'http://localhost:3000',   // se usar outro front CRA
+  'http://localhost:3000',   // Front CRA
+  'http://127.0.0.1:3000',
+  'http://localhost:5000',   // Swagger UI / API local
+  'http://127.0.0.1:5000',
+  `http://${HOST}:${PORT}`,
+  `http://localhost:${PORT}`,
 ];
+
 const corsOptions = {
   origin: (origin, callback) => {
     // Permite chamadas sem origin (Postman, curl, backend-backend)
     if (!origin) return callback(null, true);
 
-    if (allowedOrigins.includes(origin)) {
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.endsWith(`:${PORT}`)
+    ) {
       return callback(null, true);
     }
 

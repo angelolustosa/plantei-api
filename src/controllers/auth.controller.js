@@ -11,7 +11,8 @@ export default {
         email: usuario.email,
       });
     } catch (err) {
-      return res.status(400).json({ erro: err.message });
+      const mensagem = err.errors ? err.errors.map(e => e.message).join(', ') : err.message;
+      return res.status(400).json({ erro: mensagem });
     }
   },
 

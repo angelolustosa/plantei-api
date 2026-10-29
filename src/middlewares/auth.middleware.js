@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import jwtConfig from '../config/jwt.js';
 import { Usuario } from '../models/Usuario.js';
+import { updateLogContext } from '../utils/logger.js';
 
 export default async function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -21,6 +22,7 @@ export default async function authMiddleware(req, res, next) {
     }
 
     req.user = usuario;
+    updateLogContext({ userId: usuario.id });
 
     next();
   } catch {

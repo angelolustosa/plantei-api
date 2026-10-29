@@ -57,20 +57,14 @@
 
 > "Outro pilar de maturidade de software é a estrita **Separação de Responsabilidades (SoC - Separation of Concerns)**. No `plantei-api`, nós nunca colocamos regras de negócio dentro de controllers, nem lógica de requisição HTTP dentro de models."
 
-```text
-Requisição HTTP (GET /api/produtos)
-       │
-       ▼
-1. ROUTES: Define caminhos e middlewares de segurança (auth, RBAC)
-       │
-       ▼
-2. CONTROLLER: Extrai parâmetros (req.params, req.body), formata respostas HTTP
-       │
-       ▼
-3. SERVICE: Regra de negócio pura (valida estoque, calcula frete, orquestra)
-       │
-       ▼
-4. MODEL / REPOSITORY: Comunicação com a persistência de dados (Sequelize / DB)
+```mermaid
+flowchart TD
+    REQ["<b>Requisição HTTP</b><br/>(GET /api/produtos)"]
+    
+    REQ --> ROUTES["<b>1. ROUTES</b><br/>Define caminhos e middlewares de segurança (auth, RBAC)"]
+    ROUTES --> CTRL["<b>2. CONTROLLER</b><br/>Extrai parâmetros (req.params, req.body), formata respostas HTTP"]
+    CTRL --> SERV["<b>3. SERVICE</b><br/>Regra de negócio pura (valida estoque, calcula frete, orquestra)"]
+    SERV --> MODEL["<b>4. MODEL / REPOSITORY</b><br/>Comunicação com a persistência de dados (Sequelize / DB)"]
 ```
 
 > "Vejam a elegância desse design: se amanhã trocarmos o Express pelo Fastify ou pelo NestJS, nossos **Services e Regras de Negócio não sofrem nenhuma alteração**. E para testar, podemos mockar o Service sem depender de servidor HTTP."
@@ -120,17 +114,17 @@ Permissoes.belongsToMany(Perfil, {
 
 > "Para que um sistema escale horizontalmente (isto é, adicionando mais réplicas de containers em vez de apenas comprar máquinas mais caras), ele **precisa ser estritamente Stateless (sem estado)**."
 
-```text
-               [ Usuários / Front-end ]
-                          │
-                          ▼
-              [ Load Balancer (NGINX) ]
-              ┌───────────┼───────────┐
-              ▼           ▼           ▼
-         [ Réplica 1 ] [ Réplica 2 ] [ Réplica 3 ]
-              └───────────┬───────────┘
-                          ▼
-            [ Banco PostgreSQL Central ]
+```mermaid
+flowchart TD
+    USERS["Usuários / Front-end"] --> LB["Load Balancer (NGINX)"]
+    
+    LB --> R1["Réplica 1"]
+    LB --> R2["Réplica 2"]
+    LB --> R3["Réplica 3"]
+    
+    R1 --> DB[("Banco PostgreSQL Central")]
+    R2 --> DB
+    R3 --> DB
 ```
 
 > "No `plantei-api`, nós não guardamos sessões em memória local (`express-session` em memória RAM é uma armadilha que impede ter 2 réplicas!)."

@@ -9,6 +9,7 @@ export const registrarUsuario = async (payload) => {
 
   return Usuario.create({
     ...payload,
+    id_perfil: payload.id_perfil ?? payload.perfilId ?? 2,
     senha: senhaHash,
   });
 };

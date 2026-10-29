@@ -2,173 +2,245 @@
 # Disciplina 2 — Acelerando a Documentação com IA: OpenAPI/Swagger, Diagramas C4 e ADRs Vivos
 **Duração estimada:** 9–10 min  
 **Projeto:** `plantei-api`  
-**Arquivos de referência:** `src/app.js` · `src/routes/produto.routes.js` · `docs/swagger.js` · `docs/diagrams/c4-model.mmd`  
-**Objetivo:** Integrar documentação interativa Swagger (OpenAPI 3.0) ao `plantei-api`, utilizar Inteligência Artificial para extrair schemas e anotações a partir do código, e gerar documentação arquitetural viva (C4 Model com Mermaid e Architecture Decision Records - ADRs) em até 10 minutos.
+**Arquivos de referência:** `package.json` · `src/app.js` · `docs/swagger.js` · `docs/diagrams/c4-model.mmd` · `docs/adr/001-adopcao-postgresql-e-jwt.md`  
+**Objetivo:** Instalar e configurar a documentação interativa Swagger (OpenAPI 3.0) do zero no `plantei-api`, utilizar IA para extrair schemas e endpoints a partir dos Models/Controllers, e versionar diagramas C4 Model e ADRs no repositório.
 
 ---
 
-## 🎬 ABERTURA (0:00 – 1:00)
+## 🎬 ABERTURA & CONTEXTO (0:00 – 1:00)
 
-**[TELA: Editor aberto com código e uma aba de navegador com interface interativa do Swagger UI do `plantei-api`]**
+**[TELA: Editor aberto no terminal do `plantei-api` e uma aba rápida mostrando uma interface do Swagger UI interativa]**
 
 > "Fala devs, sejam muito bem-vindos à **Disciplina 2: Acelerando a Documentação com IA**!"
 
-> "Vamos ser honestos: quase todo desenvolvedor adora código, mas odeia escrever e manter documentação. O resultado todo mundo conhece: documentos em Word ou Notion que ficam desatualizados logo no primeiro commit e acabam sendo abandonados."
+> "Vamos ser francos: documentação feita à mão em Word, Confluence ou Notion nasce desatualizada e morre esquecida. Mas um sistema sem documentação trava o onboarding de novos devs e transforma qualquer integração de frontend ou parceiro em um suporte interminável."
 
-> "Só que um sistema sem documentação clara é um sistema que não escala: o onboarding de novos desenvolvedores demora meses e a integração com times de frontend ou parceiros externos vira um caos de perguntas no chat da empresa."
-
-> "A boa notícia é que você **não precisa mais escrever documentação manualmente do zero**. Hoje vamos aprender como usar Inteligência Artificial para gerar especificações OpenAPI/Swagger perfeitas a partir do código do `plantei-api`, criar diagramas de arquitetura C4 Model e registrar decisões com ADRs em menos de 10 minutos."
+> "Hoje vamos resolver isso de forma definitiva: vamos partir da **instalação das dependências e configuração no código**, usar a IA para extrair a especificação OpenAPI 3.0 do nosso `plantei-api` em segundos, e fechar com diagramas C4 vivos em Mermaid e registros de decisão arquitetural (ADRs)."
 
 ---
 
-## 📖 PARTE 1 — O Padrão OpenAPI 3.0 e Swagger no Express (1:00 – 3:00)
+## 🛠️ PASSO 1 — Instalação e Estrutura de Documentação (1:00 – 2:30)
 
-**[TELA: Navegador exibindo `http://localhost:3000/api-docs` com a interface Swagger UI interativa]**
+**[TELA: Terminal do VS Code aberto na raiz de `plantei-api` executando os comandos]**
 
-> "O padrão da indústria para documentar APIs RESTful é a especificação **OpenAPI 3.0** (anteriormente conhecida como Swagger). Ela define esquemas de requisição, parâmetros, respostas e autenticação em um formato padronizado (JSON ou YAML)."
+> "O primeiro passo é instalar o middleware responsável por renderizar a interface gráfica do Swagger dentro do Express."
 
-> "No `plantei-api`, integramos o `swagger-ui-express` diretamente no nosso `src/app.js`:"
+### 1.1 Instalação do Pacote
+```bash
+npm install swagger-ui-express
+```
+
+---
+
+### 1.2 Criação da Estrutura de Diretórios
+> "Para manter o projeto profissional e organizado no padrão *Docs as Code*, criamos uma pasta dedicada `docs/` para abrigar a documentação da API, diagramas e registros de decisão:"
+
+```bash
+mkdir docs
+mkdir docs/diagrams
+mkdir docs/adr
+```
+
+---
+
+## 🤖 PASSO 2 — Extraindo Schemas e Endpoints com IA (2:30 – 4:45)
+
+**[TELA: Lado esquerdo com `src/models/Produto.js` e `src/controllers/produto.controller.js`; lado direito no Chat de IA colando o prompt]**
+
+> "Agora vem o pulo do gato: em vez de digitar 300 linhas de YAML/JSON na mão, alimentamos a IA com os nossos arquivos reais de modelo e rotas para ela gerar a especificação OpenAPI 3.0 exata."
+
+### Prompt de Engenharia de Contexto para a IA:
+```markdown
+Você é um Arquiteto de Software especialista em OpenAPI 3.0 e Node.js.
+Analise o Model Produto (Sequelize) e o Controller de produtos anexados (operações GET, POST, PUT, DELETE).
+
+Gere um arquivo JavaScript (`docs/swagger.js`) exportando o objeto de especificação OpenAPI 3.0 completo com:
+1. Metadados da API (title: "Plantei API", version: "1.0.0", description).
+2. Esquema de autenticação Bearer JWT no componente `securitySchemes`.
+3. Schemas completos com tipos, validações e exemplos reais de plantas/produtos.
+4. Definição completa das rotas `/api/produtos` e `/api/produtos/{id}` com códigos 200, 201, 400, 401, 404 e 500.
+```
+
+### 2.1 Criando o arquivo `docs/swagger.js`
+> "A IA nos retorna a especificação pronta no formato ES Module, evitando problemas com imports de JSON no Node moderno:"
 
 ```javascript
-// src/app.js ou docs/swagger.js
-import swaggerUi from 'swagger-ui-express';
-import swaggerDocument from './swagger.json' assert { type: 'json' };
-
-// Rota para documentação interativa
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-```
-
-> "Ao acessar `/api-docs`, qualquer pessoa — seja um desenvolvedor front-end, um testador de QA ou um cliente — consegue testar as rotas interativamente, disparar requisições autenticadas e ver os esquemas de retorno em tempo real."
-
----
-
-## 🤖 PARTE 2 — Usando IA para Gerar Schemas e Anotações (3:00 – 5:15)
-
-**[TELA: Dividir a tela: lado esquerdo `src/models/Produto.js` e `src/controllers/produto.controller.js`; lado direito prompt da IA gerando a especificação OpenAPI]**
-
-> "Escrever o arquivo OpenAPI na mão linha por linha é tedioso e sujeito a erros. É aqui que a Inteligência Artificial entra como uma aceleradora impressionante."
-
-> "Nós passamos o model Sequelize e o controller correspondente para a IA com o seguinte prompt contextual:"
-
-```markdown
-Prompt de Engenharia de Documentação:
-"Você é um Arquiteto de Software especialista em OpenAPI 3.0.
-Com base no Model Produto e no Controller em anexo (rotas GET, POST, PUT, DELETE):
-1. Gere a especificação completa de paths e schemas em formato JSON/YAML.
-2. Defina os campos obrigatórios, tipos (string, number, boolean) e exemplos reais.
-3. Inclua respostas de sucesso (200, 201) e erros (400, 401, 404, 500).
-4. Configure o esquema de segurança com Bearer JWT (HTTP Bearer)."
-```
-
-**[TELA: Mostrar a especificação OpenAPI gerada com perfeição]**
-
-> "Em 5 segundos, a IA nos entrega o schema completo:"
-
-```json
-"/api/produtos": {
-  "post": {
-    "summary": "Cadastrar um novo produto",
-    "tags": ["Produtos"],
-    "security": [{ "bearerAuth": [] }],
-    "requestBody": {
-      "required": true,
-      "content": {
-        "application/json": {
-          "schema": {
-            "type": "object",
-            "required": ["nome", "preco", "categoria"],
-            "properties": {
-              "nome": { "type": "string", "example": "Monstera Deliciosa (Costela-de-Adão)" },
-              "preco": { "type": "number", "example": 89.90 },
-              "categoria": { "type": "string", "example": "Plantas de Interior" },
-              "estoque": { "type": "integer", "example": 25 }
-            }
-          }
-        }
+// docs/swagger.js
+export const swaggerSpec = {
+  openapi: '3.0.0',
+  info: {
+    title: 'Plantei API',
+    version: '1.0.0',
+    description: 'Documentação viva interativa das rotas e esquemas da Plantei API.'
+  },
+  servers: [
+    { url: '/', description: 'Servidor Atual (Automático)' },
+    { url: 'http://localhost:5000', description: 'Ambiente Local (Porta 5000)' }
+  ],
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT'
       }
     },
-    "responses": {
-      "201": { "description": "Produto cadastrado com sucesso" },
-      "400": { "description": "Dados inválidos fornecidos" }
+    schemas: {
+      Produto: {
+        type: 'object',
+        required: ['nome', 'preco', 'estoque'],
+        properties: {
+          id: { type: 'integer', example: 1 },
+          nome: { type: 'string', example: 'Monstera Deliciosa (Costela-de-Adão)' },
+          descricao: { type: 'string', example: 'Planta de folhagem exuberante e meia-sombra' },
+          preco: { type: 'number', example: 89.90 },
+          estoque: { type: 'integer', example: 15 },
+          image_url: { type: 'string', example: 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b' }
+        }
+      }
+    }
+  },
+  paths: {
+    '/api/produtos': {
+      get: {
+        summary: 'Listar produtos cadastrados',
+        tags: ['Produtos'],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: { description: 'Lista de produtos retornada com sucesso' }
+        }
+      },
+      post: {
+        summary: 'Cadastrar novo produto',
+        tags: ['Produtos'],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          201: { description: 'Produto criado com sucesso' },
+          400: { description: 'Dados de validação incorretos' }
+        }
+      }
     }
   }
-}
+};
 ```
-
-> "Colamos no projeto e nossa documentação viva está completa, sem esforço mecânico!"
 
 ---
 
-## 📐 PARTE 3 — Documentação Arquitetural com C4 Model e Mermaid (5:15 – 7:15)
+## 🔌 PASSO 3 — Conectando o Swagger no Express (`src/app.js`) (4:45 – 6:15)
 
-**[TELA: Renderizar diagrama Mermaid no VS Code ou navegador com os níveis Context e Container do C4 Model]**
+**[TELA: Abrir `src/app.js`, importar os módulos e adicionar a rota de documentação]**
 
-> "Documentação de API é essencial, mas ela mostra apenas as árvores. Para enxergar a floresta inteira, nós precisamos de documentação arquitetural. O padrão moderno mais respeitado é o **C4 Model** (Context, Containers, Components, Code)."
+> "Com o spec gerado, basta importar o `swagger-ui-express` e o nosso `swaggerSpec` dentro do `src/app.js` e expor o endpoint `/api-docs`:"
 
-> "Com a IA, podemos gerar o código do diagrama no padrão **Mermaid**, que é renderizado nativamente no GitHub e em qualquer documentação Markdown:"
+```javascript
+// src/app.js
+import express from 'express';
+import cors from './config/cors.js';
+import routes from './routes/index.js';
+import healthRoutes from './routes/health.routes.js';
+import errorMiddleware from './middlewares/error.middleware.js';
+import requestLoggerMiddleware from './middlewares/request-logger.middleware.js';
 
+// 1. Importar o Swagger UI e a especificação gerada
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from '../docs/swagger.js';
+
+const app = express();
+
+app.use(cors);
+app.use(requestLoggerMiddleware);
+app.use(express.json());
+
+// 2. Rota interativa de documentação Swagger
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+// Rotas existentes da aplicação
+app.use('/health', healthRoutes);
+app.use('/api', routes);
+
+app.use(errorMiddleware);
+
+export default app;
+```
+
+### 3.1 Testando a Documentação Viva
+> "Subimos a API com `npm start` e acessamos no navegador `http://localhost:5000/api-docs`."
+
+**[TELA: Navegador em `http://localhost:5000/api-docs`, clicando em `GET /health` ou `GET /api/produtos`, depois no botão 'Try it out' e 'Execute', mostrando a resposta em tempo real sem erros de CORS]**
+
+---
+
+## 📐 PASSO 4 — Diagramas Arquiteturais com C4 Model e Mermaid (6:15 – 7:45)
+
+**[TELA: Abrir o arquivo `docs/diagrams/c4-model.mmd` e visualizar a renderização em tempo real]**
+
+> "A documentação de endpoints mostra como conversar com a API, mas para entender como os componentes se conectam, precisamos de documentação arquitetural. Usamos o **C4 Model** com sintaxe **Mermaid**, que renderiza nativamente no GitHub e em editores Markdown."
+
+### Arquivo: `docs/diagrams/c4-model.mmd`
 ```mermaid
 graph TD
-    Client["👤 Usuário / Cliente Web (React)"] -->|HTTPS / REST| LB["🌐 NGINX (Load Balancer)"]
-    LB -->|Reverse Proxy| API1["🚀 plantei-api (Node.js/Express)"]
-    LB -->|Reverse Proxy| API2["🚀 plantei-api (Réplica 2)"]
+    Client["👤 Usuário / App Web (React)"] -->|HTTPS / REST| LB["🌐 NGINX Reverse Proxy"]
+    LB -->|Balanceamento| API1["🚀 plantei-api (Instância 1)"]
+    LB -->|Balanceamento| API2["🚀 plantei-api (Instância 2)"]
     
     API1 -->|Conexão Pool| DB[("🐘 PostgreSQL (plantei_db)")]
     API2 -->|Conexão Pool| DB
     
-    API1 -->|Cache Leitura| Cache[("⚡ Redis Cache")]
-    API2 -->|Cache Leitura| Cache
+    API1 -->|Leitura/Cache| Cache[("⚡ Redis Cache")]
+    API2 -->|Leitura/Cache| Cache
 ```
 
-> "Esse diagrama vive no próprio repositório Git dentro da pasta `docs/diagrams/`. Quando a arquitetura evolui, nós alteramos o código Mermaid e o diagrama se atualiza automaticamente em todos os Pull Requests."
+> "Como o diagrama é código puro versionado no Git, qualquer mudança de infraestrutura é revisada via Pull Request."
 
 ---
 
-## 📝 PARTE 4 — Registros de Decisão de Arquitetura (ADRs) com IA (7:15 – 8:50)
+## 📝 PASSO 5 — Registros de Decisão de Arquitetura (ADRs) com IA (7:45 – 9:00)
 
-**[TELA: Abrir arquivo `docs/adr/001-adopcao-postgresql-e-jwt.md`]**
+**[TELA: Abrir `docs/adr/001-adopcao-postgresql-e-jwt.md`]**
 
-> "Quantas vezes você entrou em um projeto antigo e se perguntou: *'Por que escolheram essa biblioteca? Por que o banco é relacional e não NoSQL?'* E ninguém sabia responder porque o desenvolvedor que decidiu já tinha saído da empresa."
+> "E para registrar o *'porquê'* das escolhas técnicas antes que o contexto se perca, criamos **ADRs (Architecture Decision Records)** usando a IA para formatar a justificativa técnica."
 
-> "Para resolver isso, utilizamos os **ADRs (Architecture Decision Records)**. É um documento curto e estruturado que registra decisões arquiteturais críticas:"
-
+### Arquivo: `docs/adr/001-adopcao-postgresql-e-jwt.md`
 ```markdown
 # ADR 001: Adoção de PostgreSQL e Autenticação JWT no Plantei API
 ## Status: Aceito (Accepted)
-## Contexto:
-A plataforma Plantei necessita de controle transacional rigoroso para estoque 
-e relações N:N entre perfis e permissões de usuários.
-## Decisão:
-Adotar o banco relacional PostgreSQL com ORM Sequelize e autenticação via JWT 
-stateless para permitir balanceamento de carga horizontal.
-## Consequências:
-- Positivo: Integridade referencial garantida pelo SGBD e facilidade de escala das réplicas.
-- Negativo: Necessidade de migrações estruturadas para alterações de schema.
-```
+## Data: 2026-10-29
 
-> "Usamos a IA para rascunhar o ADR sempre que uma decisão importante for tomada no projeto, garantindo memória técnica perene para o time."
+## Contexto:
+O sistema necessita de integridade referencial para pedidos, estoque e usuários, além de suporte a alta concorrência com réplicas sem sessão em memória.
+
+## Decisão:
+1. Utilizar PostgreSQL com Sequelize ORM para consistência transacional ACID.
+2. Utilizar autenticação stateless via tokens JWT para facilitar o escalonamento horizontal.
+
+## Consequências:
+- **Positivas:** Fácil escalabilidade das instâncias de API e integridade garantida no banco.
+- **Negativas:** Exige migrações controladas de banco e revogação de tokens via lista de bloqueio/Redis.
+```
 
 ---
 
-## 🎯 CONCLUSÃO E PRÓXIMOS PASSOS (8:50 – 10:00)
+## 🎯 CONCLUSÃO E PRÓXIMA AULA (9:00 – 10:00)
 
-**[TELA: Professor em destaque com resumo dos tópicos abordados]**
+**[TELA: Professor com resumo dos passos executados]**
 
-> "Hoje provamos que documentação não precisa ser um fardo. Com a estratégia certa e o uso de IA como copiloto, você gera Swagger/OpenAPI interativo, diagramas arquiteturais C4 Model e ADRs em questão de minutos."
+> "Em menos de 10 minutos saímos de uma API sem documentação para um ecossistema com Swagger interativo em `/api-docs`, diagramas C4 vivos e decisões arquiteturais registradas com o apoio da IA."
 
-> "Agora que nosso sistema está modelado, documentado e compreensível para qualquer engenheiro, resta um grande desafio: **como fazer esse sistema responder em milissegundos mesmo sob milhares de requisições por segundo?**"
+> "Agora que nossa arquitetura está documentada e compreensível, o próximo desafio é desempenho: **o que acontece quando milhares de pessoas tentam comprar ao mesmo tempo na Plantei?**"
 
-> "Na nossa **Disciplina 3: Otimização e Performance**, vamos caçar gargalos de banco de dados, implementar cache com Redis e rodar testes de carga com k6."
+> "Na nossa próxima aula — **Otimização e Performance** —, vamos caçar gargalos de queries no Postgres, aplicar cache inteligente com Redis e estressar nossa API com testes de carga no k6."
 
-> "Até lá!"
+> "Bora codar e até a próxima!"
 
 ---
 
 ## 📋 CHECKLIST RÁPIDO DO GRAVADOR
 
-- [ ] **0:00** Abrir destacando por que a documentação morre quando feita de forma manual.
-- [ ] **1:00** Mostrar a rota `/api-docs` do Swagger UI funcionando no navegador.
-- [ ] **3:00** Exibir o prompt de IA lendo `Produto.js` e gerando o JSON OpenAPI 3.0.
-- [ ] **5:15** Exibir o diagrama C4 Model renderizado em Mermaid com cliente, API, Postgres e Redis.
-- [ ] **7:15** Apresentar a estrutura de um Architecture Decision Record (ADR 001).
-- [ ] **8:50** Concluir e fazer o gancho para a Disciplina 3 (Otimização e Performance).
+- [ ] **1:00** Rodar `npm install swagger-ui-express` no terminal.
+- [ ] **2:00** Criar a árvore de pastas `docs/`, `docs/diagrams/` e `docs/adr/`.
+- [ ] **2:30** Demonstrar o prompt com IA analisando `Produto.js` e salvando `docs/swagger.js`.
+- [ ] **4:45** Inserir os imports e o middleware `app.use('/api-docs', ...)` no `src/app.js`.
+- [ ] **5:30** Rodar `npm start` e testar a rota no navegador `http://localhost:5000/api-docs`.
+- [ ] **6:15** Exibir o diagrama C4 Model em Mermaid no editor.
+- [ ] **7:45** Mostrar o arquivo ADR 001 estruturado.
+- [ ] **9:00** Finalizar com chamada para a aula de Otimização e Cache com Redis.

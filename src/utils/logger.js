@@ -1,4 +1,7 @@
+import { AsyncLocalStorage } from 'node:async_hooks';
 import winston from 'winston';
+
+const logContext = new AsyncLocalStorage();
 
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
@@ -13,18 +16,30 @@ const logger = winston.createLogger({
   ]
 });
 
+function withContext(meta = {}) {
+  return { ...logContext.getStore(), ...meta };
+}
+
+export function runWithLogContext(context, callback) {
+  return logContext.run(context, callback);
+}
+
+export function updateLogContext(context) {
+  Object.assign(logContext.getStore() || {}, context);
+}
+
 // Suporte a logs simples ou com metadados (correlationId, userId, endpoint, etc.)
 export const log = {
-  info: (msg, meta = {}) => logger.info(msg, meta),
-  success: (msg, meta = {}) => logger.info(`[SUCCESS] ${msg}`, meta),
-  warn: (msg, meta = {}) => logger.warn(msg, meta),
+  info: (msg, meta = {}) => logger.info(msg, withContext(meta)),
+  success: (msg, meta = {}) => logger.info(`[SUCCESS] ${msg}`, withContext(meta)),
+  warn: (msg, meta = {}) => logger.warn(msg, withContext(meta)),
   error: (err, meta = {}) => {
     if (err instanceof Error) {
-      logger.error(err.message, { stack: err.stack, ...meta });
+      logger.error(err.message, withContext({ stack: err.stack, ...meta }));
     } else if (typeof err === 'object' && err !== null) {
-      logger.error(err.message || 'Error', { ...err, ...meta });
+      logger.error(err.message || 'Error', withContext({ ...err, ...meta }));
     } else {
-      logger.error(err, meta);
+      logger.error(err, withContext(meta));
     }
   },
 };
