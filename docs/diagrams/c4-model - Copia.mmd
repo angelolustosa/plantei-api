@@ -1,0 +1,21 @@
+graph TD
+    Client["👤 Usuário / App Web (React)"] -->|HTTPS / REST| LB["🌐 NGINX (Load Balancer & Reverse Proxy)"]
+    LB -->|Reverse Proxy / Round Robin| API1["🚀 plantei-api (Instância 1 - Node.js)"]
+    LB -->|Reverse Proxy / Round Robin| API2["🚀 plantei-api (Instância 2 - Node.js)"]
+    
+    API1 -->|Conexão Pool / Sequelize| DB[("🐘 PostgreSQL (plantei_db)")]
+    API2 -->|Conexão Pool / Sequelize| DB
+    
+    API1 -->|Cache Leitura & Rate Limit| Cache[("⚡ Redis Cache")]
+    API2 -->|Cache Leitura & Rate Limit| Cache
+
+    subgraph "Camada de Dados e Cache"
+        DB
+        Cache
+    end
+
+    subgraph "Camada de Aplicação"
+        API1
+        API2
+    end
+
