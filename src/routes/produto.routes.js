@@ -2,6 +2,7 @@ import { Router } from "express";
 import { produtoController } from '../controllers/index.js';
 import authMiddleware from "../middlewares/auth.middleware.js";
 import { autorizarPermissao } from "../middlewares/autorizar.middleware.js";
+import { cacheMiddleware } from "../middlewares/cache.middleware.js";
 
 const router = Router();
 
@@ -12,6 +13,7 @@ router.use(authMiddleware);
 router.get(
   "/",
   autorizarPermissao('PRODUTO_LISTAR'),
+  cacheMiddleware(60), // 👈 Cacheia a vitrine de produtos por 60 segundos
   produtoController.listar
 );
 
