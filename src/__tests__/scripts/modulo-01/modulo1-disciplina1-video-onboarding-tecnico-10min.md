@@ -99,18 +99,19 @@ cp .env.example .env
 
 ```env
 NODE_ENV=development
-PORT=3000
 
-# Conexão com o banco Docker que acabamos de subir
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=plantei_db
-DB_USER=postgres
-DB_PASS=postgrespassword
+# Conexão com o banco Docker que acabamos de subir (Padrão Sequelize no plantei-api)
+BASE_URL_DB=postgresql://postgres:postgrespassword@localhost:5432/plantei_db
+DATABASE_URL=postgresql://postgres:postgrespassword@localhost:5432/plantei_db
 
-# Segredo de assinatura dos tokens JWT
+# Segurança e Autenticação
 JWT_SECRET=super_segredo_dev_plantei_2026
 JWT_EXPIRATION=1d
+
+# Cache Distribuído com Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_URL=redis://localhost:6379
 ```
 
 > "Reparem na regra de ouro: o arquivo `.env` está explicitamente incluído no `.gitignore`. **Nunca commite o `.env` no Git**!"
@@ -134,7 +135,7 @@ npm run seed
 > "Agora vamos iniciar nosso servidor em modo de desenvolvimento com hot-reload:"
 
 ```bash
-npm run dev
+npm start
 ```
 
 **[TELA: Abrir terminal secundário ou navegador e disparar `curl http://localhost:3000/api/health`]**
@@ -173,6 +174,6 @@ curl http://localhost:3000/api/health
 - [ ] **1:00** Validar versões no terminal (`node -v`, `docker -v`, `git --version`) e explicar Conventional Commits.
 - [ ] **2:45** Executar `docker run` para o PostgreSQL 15 e confirmar com `docker ps`.
 - [ ] **5:00** Mostrar a cópia de `.env.example` para `.env` e explicar por que o `.env` é ignorado no Git.
-- [ ] **7:15** Rodar `npm run seed` e `npm run dev`, testando a resposta com `curl /api/health`.
+- [ ] **7:15** Rodar `npm run seed` e `npm start`, testando a resposta com `curl /api/health`.
 - [ ] **8:50** Concluir e fazer o gancho para a Disciplina 2 (Revisão de Engenharia Limpa e SOLID).
 

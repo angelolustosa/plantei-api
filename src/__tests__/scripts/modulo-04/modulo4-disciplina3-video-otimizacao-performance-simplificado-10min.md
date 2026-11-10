@@ -27,52 +27,52 @@
 
 ## 🔍 PARTE 1 — Diagnóstico de Banco: O Problema N+1 (1:00 – 3:00)
 
-**[TELA: Editor comparando o código ingênuo que dispara 51 queries com a solução de Eager Loading]**
+**[TELA: Editor comparando o código ingênuo de listagem de Usuários e seus Perfis com a solução de Eager Loading]**
 
 > "O erro de performance mais comum em aplicações que usam ORMs (como Sequelize, TypeORM ou Prisma) é o **Problema das N+1 Consultas**."
 
-> "Imagine que você quer listar 50 produtos da Plantei e exibir o nome da categoria de cada um. Se você fizer isso de forma ingênua:"
+> "No nosso `plantei-api`, cada `Usuario` pertence a um `Perfil` (Administrador, Usuário ou Fornecedor). Imagine que você quer listar 20 usuários na tela de administração e exibir o nome do perfil de cada um. Se você fizer isso de forma ingênua:"
 
 ```javascript
-// ❌ CÓDIGO INEFICIENTE (Gera 1 + 50 = 51 queries no banco!)
-const produtos = await Produto.findAll(); // 1 query inicial
-for (const p of produtos) {
-  const categoria = await p.getCategoria(); // +50 queries separadas no banco!
+// ❌ CÓDIGO INEFICIENTE (Gera 1 + 20 = 21 queries no banco!)
+const usuarios = await Usuario.findAll({ limit: 20 }); // 1 query inicial para buscar 20 usuários
+for (const u of usuarios) {
+  const perfil = await u.getPerfil(); // 💥 +20 queries individuais no banco, uma por usuário!
 }
 ```
 
-> "Em vez de 1 consulta rápida, você abre 51 idas e vindas de rede. O banco de dados fica sobrecarregado e a resposta demora centenas de milissegundos."
+> "Em vez de 1 consulta rápida, você abre 21 idas e vindas de rede. O banco de dados fica sobrecarregado e a resposta demora centenas de milissegundos."
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor API as Backend Express
     participant DB as PostgreSQL
-    Note over API,DB: Problema N+1: 51 idas e voltas na rede!
-    API->>DB: 1. SELECT * FROM produtos LIMIT 50;
-    loop Para cada produto (50 vezes)
-        API->>DB: SELECT * FROM categorias WHERE id = ?;
+    Note over API,DB: Problema N+1: 21 idas e voltas na rede!
+    API->>DB: 1. SELECT * FROM usuarios LIMIT 20;
+    loop Para cada usuário (20 vezes)
+        API->>DB: SELECT * FROM perfil WHERE id = usuario.id_perfil;
     end
     Note over API,DB: Solução com Eager Loading: 1 única ida e volta!
-    API->>DB: SELECT p.*, c.nome FROM produtos p LEFT JOIN categorias c ON ...;
+    API->>DB: SELECT usuarios.*, perfil.nome FROM usuarios LEFT JOIN perfil ON ...;
 ```
 
 > "A solução correta é o **Eager Loading** (carregamento adiantado com `JOIN`):"
 
 ```javascript
-// ✅ CÓDIGO OTIMIZADO (1 única query com JOIN):
-const produtos = await Produto.findAll({
-  attributes: ['id', 'nome', 'preco', 'estoque'], // Pega só o necessário
+// ✅ CÓDIGO OTIMIZADO (1 única query com LEFT JOIN):
+const usuarios = await Usuario.findAll({
+  attributes: ['id', 'nome', 'email'], // Projeta só os campos necessários
   include: [{
-    model: Categoria,
-    as: 'categoria',
-    attributes: ['id', 'nome']
+    model: Perfil,
+    as: 'perfil',
+    attributes: ['id', 'nome', 'codigo']
   }],
   limit: 20
 });
 ```
 
-> "Pronto! O banco resolve tudo internamente em **uma única consulta**, devolvendo os produtos e suas categorias de uma só vez."
+> "Pronto! O PostgreSQL resolve tudo internamente em **uma única consulta com JOIN**, devolvendo os usuários e seus perfis de uma só vez, economizando conexões e tempo de rede."
 
 ---
 
@@ -306,12 +306,45 @@ app.use(compression()); // Comprime os JSONs via Gzip (reduz o tamanho dos dados
 
 > "Como provamos cientificamente que a otimização funcionou? Com testes de estresse automatizados usando o **k6**."
 
-> "Com a nossa API ligada em um terminal (`npm start`), abrimos um segundo terminal e disparamos o teste de carga:"
+> "Com a nossa API ligada em um terminal (`npm start`), abrimos um segundo terminal e disparamos o teste de carga montando o volume da pasta atual (para salvar o relatório HTML) e mapeando a porta `5665` (para o dashboard web em tempo real):"
 
+#### No Git Bash (Windows):
 ```bash
-# Executa o teste de carga via Docker:
-docker run --rm -i grafana/k6 run -e API_URL=http://host.docker.internal:5000 - <load-test.js
+MSYS_NO_PATHCONV=1 docker run --rm \
+  -p 5665:5665 \
+  -v "$(pwd):/app" \
+  -w /app \
+  -e API_URL=http://host.docker.internal:5000 \
+  -e K6_WEB_DASHBOARD=true \
+  -e K6_WEB_DASHBOARD_PORT=5665 \
+  -e K6_WEB_DASHBOARD_HOST=0.0.0.0 \
+  -e K6_WEB_DASHBOARD_EXPORT=relatorio-k6.html \
+  grafana/k6 run load-test.js
 ```
+
+#### No PowerShell / Prompt de Comando:
+```powershell
+docker run --rm `
+  -p 5665:5665 `
+  -v "${PWD}:/app" `
+  -w /app `
+  -e API_URL=http://host.docker.internal:5000 `
+  -e K6_WEB_DASHBOARD=true `
+  -e K6_WEB_DASHBOARD_PORT=5665 `
+  -e K6_WEB_DASHBOARD_HOST=0.0.0.0 `
+  -e K6_WEB_DASHBOARD_EXPORT=relatorio-k6.html `
+  grafana/k6 run load-test.js
+```
+
+> [!TIP]
+> **O que esse comando faz de diferente?**
+> - `-p 5665:5665` e `-e K6_WEB_DASHBOARD=true`: habilita o **Dashboard Web em tempo real** do k6 acessível em `http://localhost:5665` enquanto o teste roda!
+> - `-e K6_WEB_DASHBOARD_EXPORT=relatorio-k6.html`: exporta automaticamente todo o dashboard visual para um arquivo HTML interativo ao término do teste.
+> - `-v "${PWD}:/app" -w /app`: monta a pasta atual dentro do container, garantindo que o arquivo **`relatorio-k6.html`** seja salvo na raiz do seu projeto ao finalizar.
+
+### Como visualizar os resultados:
+1. **Durante a execução:** abra o navegador em `http://localhost:5665` para acompanhar os gráficos de usuários simultâneos, taxa de requisições por segundo e latência em tempo real.
+2. **Após o término:** o arquivo `relatorio-k6.html` é gerado na raiz da pasta `plantei-api`. Basta dar dois cliques nele ou abrir no navegador para ver o relatório executivo interativo.
 
 ### O que nós analisamos no relatório final?
 
@@ -367,7 +400,7 @@ Avalie se o sistema suporta uma campanha de Black Friday com segurança."
 ## 📋 CHECKLIST RÁPIDO DO GRAVADOR
 
 - [ ] **0:00** Abertura destacando que escala vertical (mais CPU/RAM) é paliativo caro para código ruim.
-- [ ] **1:00** Demonstrar o problema N+1 no log do Sequelize e a correção com Eager Loading (`include`).
+- [ ] **1:00** Demonstrar o problema N+1 no Sequelize (Usuários x Perfis) e a correção com Eager Loading (`include: [Perfil]`).
 - [ ] **3:00** Subir o Redis via Docker, mostrar `src/config/redis.js`, plugar o `cacheMiddleware` e testar no Swagger vendo o `X-Cache: HIT` em 3ms.
 - [ ] **5:15** Explicar paginação por cursor e middleware de compressão (`compression()`).
 - [ ] **7:00** Rodar o k6 no terminal, mostrar o p95 caindo para menos de 20ms e analisar com o prompt de IA.

@@ -47,7 +47,7 @@ O Módulo 1 estabelece as bases técnicas, conceituais e operacionais para toda 
 | Parte 1 | 1:00 – 2:45 | Ferramental Essencial e Versionamento | Node.js 20 LTS, Git, Conventional Commits e boas práticas |
 | Parte 2 | 2:45 – 5:15 | Subindo o PostgreSQL via Docker | `docker run` / Docker Compose para banco efêmero e persistente |
 | Parte 3 | 5:15 – 7:30 | Configuração do `.env` e Dependências | Clonagem, `npm install`, cópia do `.env.example` e variáveis |
-| Parte 4 | 7:30 – 8:50 | Execução, Seed e Primeiro Request | `npm run dev`, população de dados de semente e teste no `/api/health` |
+| Parte 4 | 7:30 – 8:50 | Execução, Seed e Primeiro Request | `npm start`, população de dados de semente e teste no `/api/health` |
 | Conclusão | 8:50 – 10:00 | Checklist do Aluno e Próximos Passos | Ambiente 100% pronto para a Disciplina 2 (Engenharia Limpa) |
 
 ---
